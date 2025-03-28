@@ -1,14 +1,13 @@
 class CPU:
     def __init__(self, instructions):
-        self.pc = 0                      # Program counter
-        self.instructions = instructions # List of instruction strings
-        self.registers = [0] * 32        # 32 registers (r0-r31)
-        self.memory = [0] * 128          # 128 memory locations
-        self.cycle_count = 0             # Track cycles
-        
-        # Initialize memory for factorial.asm
+        self.pc = 0
+        self.instructions = instructions
+        self.registers = [0] * 32
+        self.memory = [0] * 128
         self.memory[0] = 5  # Input n
         self.memory[1] = 1  # Constant 1
+        # memory[2] stays 0 until STORE
+        self.cycle_count = 0
 
     def fetch(self):
         """Fetch the next instruction."""
@@ -23,8 +22,6 @@ class CPU:
         return instr.split()  # e.g., ["LOAD", "1", "0"]
 
     def execute(self, op, args):
-        """Execute one of the 4 supported instructions."""
-        # Convert args to integers
         args = [int(arg) for arg in args]
         if op == "ADD":
             self.registers[args[0]] = self.registers[args[1]] + self.registers[args[2]]
@@ -34,6 +31,8 @@ class CPU:
             self.registers[args[0]] = self.memory[args[1]]
         elif op == "STORE":
             self.memory[args[1]] = self.registers[args[0]]
+        elif op == "CLR":
+            self.registers[args[0]] = 0
 
     def run(self):
         """Run the CPU until all instructions are done."""

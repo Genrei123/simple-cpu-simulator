@@ -1,17 +1,24 @@
 def assemble(file):
-    instructions = [line.rstrip('\n') for line in open(file)]
-    instructions = list(filter(None, instructions))
-    instructions = list(filter(lambda line: not line.startswith(";"), instructions))
-    labels = list(filter(lambda line: line.startswith("-"), instructions))
+    SUPPORTED_OPS = ["ADD", "SUB", "LOAD", "STORE", "CLR"]
+    # Read lines, strip whitespace, and remove comments
+    instructions = []
+    with open(file, 'r') as f:
+        for line in f:
+            # Remove inline comments and strip
+            line = line.split(';', 1)[0].strip()
+            if line:  # Only process non-empty lines
+                instructions.append(line)
+    
+    # Process each instruction
+    processed = []
     for instr in instructions:
-        for label in labels:
-            if label == instr:
-                labels[labels.index(label)] = [str(label), instructions.index(instr)]
-                instructions.remove(instr)
-
-    for instr in instructions:
-        for label in labels:
-            if label[0] in instr:
-                instructions[instructions.index(instr)] = instr.replace(label[0], str(label[1]))
-
-    return instructions, labels
+        parts = instr.split()
+        op = parts[0]
+        if op not in SUPPORTED_OPS:
+            raise ValueError(f"Unsupported instruction: {op}")
+        
+        # Convert register names to indices (R1 → 1) and keep as a single string
+        args = [x[1:] if x.startswith('R') else x for x in parts[1:]]
+        processed.append(" ".join([op] + args))  # e.g., "LOAD 1 0"
+    
+    return processed, []

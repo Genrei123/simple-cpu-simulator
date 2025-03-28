@@ -1,33 +1,24 @@
 import sys
-from cpu import CPU
+from CPU import CPU  # Adjusted import path
 from assembler import assemble
-from cpu.pipeline import fetch_unit, decode_unit, execute_unit, writeback_unit
-from Benchmarks.memory_initialisation import INITIALISATION
-from cpu.Memory import MEMORY
 
-if len(sys.argv) < 2:
-    sys.exit()
-else:
-    debug = False
-    if len(sys.argv) > 2:
-        debug = sys.argv[2] == "debug"
+def main():
+    if len(sys.argv) < 2:
+        print("Usage: python main.py <assembly_file.asm> [debug]")
+        sys.exit(1)
 
-    instructions, labels = assemble(sys.argv[1])
-    
-    eus = [execute_unit.execute_unit(), execute_unit.execute_unit(), execute_unit.execute_unit(), execute_unit.execute_unit()]
-    fu = fetch_unit.fetch_unit(len(eus))
-    du = decode_unit.decode_unit()
-    wu = writeback_unit.writeback_unit()
+    debug = len(sys.argv) > 2 and sys.argv[2] == "debug"
 
-    cpu = CPU.CPU(instructions, labels, fu, du, eus, wu)
-    if sys.argv[1][11:] in INITIALISATION:
-        MEMORY[:] = INITIALISATION[sys.argv[1][11:]]
-    i = 0
-    while not cpu.check_done():
-        cpu.iterate(debug) 
-        # i += 1
-        # if i == 3000:
-        #     debug = True
-        
-    cpu.print_state(True) 
+    # Assemble the program
+    instructions, _ = assemble(sys.argv[1])
 
+    # Initialize and run the CPU
+    cpu = CPU(instructions)
+    cpu.run()
+
+    # Print final state if debug mode
+    if debug:
+        cpu.print_state()
+
+if __name__ == "__main__":
+    main()
